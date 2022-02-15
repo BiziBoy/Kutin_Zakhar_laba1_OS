@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Xml.Linq;
 
 namespace Kutin_Zakhar_laba1_OS
 {
@@ -31,7 +32,7 @@ namespace Kutin_Zakhar_laba1_OS
     /// </summary>
     /// <param name="_pathDir"></param>
     /// <param name="_path"></param>
-    static void processATextFile(string _pathDir, string _path ) 
+    static void processTextFile(string _pathDir, string _path ) 
     {
       //Создать папку 
       DirectoryInfo dirInfo = new DirectoryInfo(_pathDir);
@@ -87,12 +88,51 @@ namespace Kutin_Zakhar_laba1_OS
       }
     }
 
+    /// <summary>
+    /// Создает XML файл.
+    /// </summary>
+    static void processXMLFile()
+    {
+      XDocument xDoc = new XDocument();
+      Console.WriteLine($"Файл XML создан.");
+      //создаем элемент - студент
+      XElement student = new XElement("student");
+      Console.Write("Введите имя студента: ");
+      XAttribute nameXAttr = new XAttribute("name", Console.ReadLine());
+      Console.Write("Введите фамилию студента: ");
+      XAttribute surnameXAttr = new XAttribute("surname", Console.ReadLine());
+      Console.Write("Введите группу студента: ");
+      XElement groupXElm = new XElement("group", Console.ReadLine());
+      Console.Write("Введите год поступления студента: ");
+      XElement yearXElm = new XElement("year", Console.ReadLine());
+      Console.Write("Введите факультет студента: ");
+      XElement facultyXElm = new XElement("faculty", Console.ReadLine());
+      //добавим выше введенные данные к student
+      student.Add(nameXAttr);
+      student.Add(surnameXAttr);
+      student.Add(groupXElm);
+      student.Add(yearXElm);
+      student.Add(facultyXElm);
+      //создадим корневой элемент
+      XElement students = new XElement("students");
+      //добавим в корневой элемент введеннго студента
+      students.Add(student);
+      // добавляем корневой элемент в документ
+      xDoc.Add(students);
+      //сохраняем документ
+      xDoc.Save("students.xml");
+
+    }
+
     static void Main(string[] args)
     {
       getDiskInformation();
-      string pathDir = @"C:\SomeDir";
-      string path = @"C:\SomeDir\hta.txt";
-      processATextFile(pathDir, path);
+      string pathDirTXT = @"C:\SomeDirTXT";
+      string pathTXT = @"C:\SomeDirTXT\hta.txt";
+      processTextFile(pathDirTXT, pathTXT);
+      processXMLFile();
+
+      Console.Read();
     }
   }
 }
