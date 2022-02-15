@@ -11,17 +11,18 @@ namespace Kutin_Zakhar_laba1_OS
     /// </summary>
     static void getDiskInformation() 
     {
+      Console.WriteLine("1.Вывести информацию в консоль о логических дисках, именах, метке тома, размере типе файловой системы. ");
       DriveInfo[] drives = DriveInfo.GetDrives();
       //получить информацию о дисках
       foreach (DriveInfo drive in drives)
       {
-        Console.WriteLine($"Название: {drive.Name}");
-        Console.WriteLine($"Тип: {drive.DriveType}");
+        Console.WriteLine($"\tНазвание: {drive.Name}");
+        Console.WriteLine($"\tТип: {drive.DriveType}");
         if (drive.IsReady)
         {
-          Console.WriteLine($"Объем диска: {drive.TotalSize}");
-          Console.WriteLine($"Свободное пространство: {drive.TotalFreeSpace}");
-          Console.WriteLine($"Метка: {drive.VolumeLabel}");
+          Console.WriteLine($"\tОбъем диска: {drive.TotalSize}");
+          Console.WriteLine($"\tСвободное пространство: {drive.TotalFreeSpace}");
+          Console.WriteLine($"\tМетка: {drive.VolumeLabel}");
         }
         Console.WriteLine();
       }
@@ -34,6 +35,7 @@ namespace Kutin_Zakhar_laba1_OS
     /// <param name="_path"></param>
     static void processTextFile(string _pathDir, string _path ) 
     {
+      Console.WriteLine("2.Работа с файлами ");
       //Создать папку 
       DirectoryInfo dirInfo = new DirectoryInfo(_pathDir);
       if (!dirInfo.Exists)
@@ -45,13 +47,13 @@ namespace Kutin_Zakhar_laba1_OS
       {
         using (FileStream fStream = File.Create(_path))
         {
-          Console.WriteLine($"Файл, создан по пути: {_path}");
+          Console.WriteLine($"\tФайл, создан по пути: {_path}");
           //если файл создан, получить информацию о файле
           if (fileInf.Exists)
           {
-            Console.WriteLine("Имя файла: {0}", fileInf.Name);
-            Console.WriteLine("Время создания: {0}", fileInf.CreationTime);
-            Console.WriteLine("Размер: {0}", fileInf.Length);
+            Console.WriteLine("\tИмя файла: {0}", fileInf.Name);
+            Console.WriteLine("\tВремя создания: {0}", fileInf.CreationTime);
+            Console.WriteLine("\tРазмер: {0}", fileInf.Length);
             Console.WriteLine();
           }
         }
@@ -60,7 +62,7 @@ namespace Kutin_Zakhar_laba1_OS
       {
         Console.WriteLine(e.Message);
       }
-      Console.Write("Введите строку для записи в файл: ");
+      Console.Write("\tВведите строку для записи в файл: ");
       string text = Console.ReadLine();
       try
       {
@@ -72,7 +74,7 @@ namespace Kutin_Zakhar_laba1_OS
         //Открыть поток и прочитать файл
         using (StreamReader sr = new StreamReader(_path))
         {
-          Console.Write("Информация из файла: ");
+          Console.Write("\tИнформация из файла: ");
           Console.WriteLine(sr.ReadToEnd());
         }
       }
@@ -84,28 +86,31 @@ namespace Kutin_Zakhar_laba1_OS
       if (fileInf.Exists)
       {
         fileInf.Delete();
-        Console.WriteLine($"Файл по пути {_path} удален.");
+        Console.WriteLine($"\tФайл по пути {_path} удален.");
+        Console.WriteLine();
       }
     }
 
     /// <summary>
-    /// Создает XML файл.
+    ///  Создает файл XML с названием fileName
     /// </summary>
-    static void processXMLFile()
+    /// <param name="fileName"></param>
+    static void processXMLFile(string fileName)
     {
+      Console.WriteLine("4.Работа с форматом XML ");
       XDocument xDoc = new XDocument();
-      Console.WriteLine($"Файл XML создан.");
+      Console.WriteLine($"\tФайл с именем {fileName} создан.");
       //создаем элемент - студент
       XElement student = new XElement("student");
-      Console.Write("Введите имя студента: ");
+      Console.Write("\tВведите имя студента: ");
       XAttribute nameXAttr = new XAttribute("name", Console.ReadLine());
-      Console.Write("Введите фамилию студента: ");
+      Console.Write("\tВведите фамилию студента: ");
       XAttribute surnameXAttr = new XAttribute("surname", Console.ReadLine());
-      Console.Write("Введите группу студента: ");
+      Console.Write("\tВведите группу студента: ");
       XElement groupXElm = new XElement("group", Console.ReadLine());
-      Console.Write("Введите год поступления студента: ");
+      Console.Write("\tВведите год поступления студента: ");
       XElement yearXElm = new XElement("year", Console.ReadLine());
-      Console.Write("Введите факультет студента: ");
+      Console.Write("\tВведите факультет студента: ");
       XElement facultyXElm = new XElement("faculty", Console.ReadLine());
       //добавим выше введенные данные к student
       student.Add(nameXAttr);
@@ -120,8 +125,28 @@ namespace Kutin_Zakhar_laba1_OS
       // добавляем корневой элемент в документ
       xDoc.Add(students);
       //сохраняем документ
-      xDoc.Save("students.xml");
-
+      xDoc.Save(fileName);
+      
+      //загружаем документ
+      XDocument xDocLoad = XDocument.Load(fileName);
+      XElement studentsXElement = xDoc.Element("students");
+      XElement studentXElement = xDocLoad.Element("students").Element("student");
+      //получаем информацию из документа
+      nameXAttr = studentXElement.Attribute("name");
+      surnameXAttr = studentXElement.Attribute("surname");
+      groupXElm = studentXElement.Element("group");
+      yearXElm = studentXElement.Element("year");
+      facultyXElm = studentXElement.Element("faculty");
+      //вывод информации на консоль
+      Console.WriteLine("\tИнформация в файле: ");
+      Console.WriteLine($"\t\tИмя и фамилия студента: {nameXAttr.Value} {surnameXAttr.Value}");
+      Console.WriteLine($"\t\tГруппа студента: {groupXElm.Value}");
+      Console.WriteLine($"\t\tГод поступления студента: {yearXElm.Value}");
+      Console.WriteLine($"\t\tФакультет студента: {facultyXElm.Value}");
+      //удалить файл XML
+      studentsXElement.RemoveAll();
+      xDocLoad.Save(fileName);
+      Console.WriteLine($"\tФайл с именем {fileName} очищен.");
     }
 
     static void Main(string[] args)
@@ -130,7 +155,8 @@ namespace Kutin_Zakhar_laba1_OS
       string pathDirTXT = @"C:\SomeDirTXT";
       string pathTXT = @"C:\SomeDirTXT\hta.txt";
       processTextFile(pathDirTXT, pathTXT);
-      processXMLFile();
+      string fileName = "students.xml";
+      processXMLFile(fileName);
 
       Console.Read();
     }
