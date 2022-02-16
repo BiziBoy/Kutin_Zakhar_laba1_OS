@@ -2,15 +2,16 @@
 using System.IO;
 using System.Xml.Linq;
 using System.Text.Json;
+using System.IO.Compression;
 
 namespace Kutin_Zakhar_laba1_OS
 {
   class Student
   {
-    public string name { get; set; }
-    public string surName { get; set; }
-    public int year { get; set; }
-    public string group { get; set; }
+    public string Name { get; set; }
+    public string SurName { get; set; }
+    public int Year { get; set; }
+    public string Group { get; set; }
   }
 
   class Program
@@ -59,19 +60,11 @@ namespace Kutin_Zakhar_laba1_OS
             Console.WriteLine();
           }
         }
-      }
-      catch (Exception e)
-      {
-        Console.WriteLine(e.Message);
-      }
-      Console.Write("\tВведите строку для записи в файл: ");
-      string text = Console.ReadLine();
-      try
-      {
         //перезаписывает файл, добавляя строку
         using (StreamWriter sw = new StreamWriter(path, true, System.Text.Encoding.Default))
         {
-          sw.WriteLine(text);
+          Console.Write("\tВведите строку для записи в файл: ");
+          sw.WriteLine(Console.ReadLine());
         }
         //Открыть поток и прочитать файл
         using (StreamReader sr = new StreamReader(path))
@@ -79,17 +72,17 @@ namespace Kutin_Zakhar_laba1_OS
           Console.Write("\tИнформация из файла: ");
           Console.WriteLine(sr.ReadToEnd());
         }
+        //если файл создан, удалить его
+        if (fileInf.Exists)
+        {
+          fileInf.Delete();
+          Console.WriteLine($"\tФайл по пути {path} удален.");
+          Console.WriteLine();
+        }
       }
       catch (Exception ex)
       {
         Console.WriteLine(ex.Message);
-      }
-      //если файл создан, удалить его
-      if (fileInf.Exists)
-      {
-        fileInf.Delete();
-        Console.WriteLine($"\tФайл по пути {path} удален.");
-        Console.WriteLine();
       }
     }
 
@@ -127,13 +120,13 @@ namespace Kutin_Zakhar_laba1_OS
         {
           Student student = new Student();
           Console.Write("\tВведите имя студента: ");
-          student.name = Console.ReadLine();
+          student.Name = Console.ReadLine();
           Console.Write("\tВведите фамилию студента: ");
-          student.surName = Console.ReadLine();
+          student.SurName = Console.ReadLine();
           Console.Write("\tВведите группу студента: ");
-          student.group = Console.ReadLine();
+          student.Group = Console.ReadLine();
           Console.Write("\tВведите год поступления студента: ");
-          student.year = int.Parse(Console.ReadLine());
+          student.Year = int.Parse(Console.ReadLine());
           sw.WriteLine(JsonSerializer.Serialize<Student>(student));
         }
         //чтение данных
@@ -141,21 +134,22 @@ namespace Kutin_Zakhar_laba1_OS
         {
           Console.Write("\tИнформация из файла:\n ");
           Student restoredStudent = JsonSerializer.Deserialize<Student>(sr.ReadToEnd());
-          Console.WriteLine($"\t\tName: {restoredStudent.name}\n\t\tSurname: {restoredStudent.surName}");
-          Console.WriteLine($"\t\tGroup: {restoredStudent.group}\n\t\tYear: {restoredStudent.surName}");
+          Console.WriteLine($"\t\tName: {restoredStudent.Name}\n\t\tSurname: {restoredStudent.SurName}");
+          Console.WriteLine($"\t\tGroup: {restoredStudent.Group}\n\t\tYear: {restoredStudent.SurName}");
+        }
+        //если файл создан, удалить его
+        if (fileJSON.Exists)
+        {
+          fileJSON.Delete();
+          Console.WriteLine($"\tФайл по пути {path} удален.");
+          Console.WriteLine();
         }
       }
       catch (Exception e)
       {
         Console.WriteLine(e.Message);
       }
-      //если файл создан, удалить его
-      if (fileJSON.Exists)
-      {
-        fileJSON.Delete();
-        Console.WriteLine($"\tФайл по пути {path} удален.");
-        Console.WriteLine();
-      }
+
     }
 
     /// <summary>
@@ -237,6 +231,109 @@ namespace Kutin_Zakhar_laba1_OS
       }
     }
 
+    /// <summary>
+    /// Создает архив по pathArchive, добавляет файл pathFile в архив и выводит его на консоль 
+    /// </summary>
+    /// <param name="pathArchive"></param>
+    /// <param name="pathFile"></param>
+    static void processZIPArchive(string pathArchive, string pathFile)
+    {
+      Console.WriteLine("5.Создание zip архива, добавление туда файла, определение размера архива ");
+      try
+      {
+        using (FileStream fStream = File.Create(pathArchive))
+        {
+          Console.WriteLine($"\tФайл, создан по пути: {pathArchive}");
+          FileInfo fileInf = new FileInfo(pathArchive);
+          //если файл создан, получить информацию о файле
+          if (fileInf.Exists)
+          {
+            Console.WriteLine("\tИмя файла: {0}", fileInf.Name);
+            Console.WriteLine("\tВремя создания: {0}", fileInf.CreationTime);
+            Console.WriteLine("\tРазмер: {0}", fileInf.Length);
+            Console.WriteLine();
+          }
+        }
+        //запись файла в архив
+        using (FileStream zipToOpen = new FileStream(pathArchive, FileMode.Open))
+        {
+          using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+          {
+            ZipArchiveEntry fileText = archive.CreateEntry(pathFile);
+            using (StreamWriter writer = new StreamWriter(fileText.Open()))
+            {
+              Console.Write($"\tВведите данные в файл для добавления его в архив {pathArchive}: ");
+              writer.WriteLine(Console.ReadLine());
+            }
+          }
+        }
+        FileInfo fileInfArchive = new FileInfo(pathArchive);
+        //если файл создан, получить информацию о файле
+        if (fileInfArchive.Exists)
+        {
+          Console.WriteLine("\tИмя файла: {0}", fileInfArchive.Name);
+          Console.WriteLine("\tВремя создания: {0}", fileInfArchive.CreationTime);
+          Console.WriteLine("\tРазмер: {0}", fileInfArchive.Length);
+          Console.WriteLine();
+        }
+        //разархивация файла в архиве
+        using (ZipArchive zip = ZipFile.OpenRead(pathArchive))
+        {
+          zip.ExtractToDirectory("./");
+        }
+        Console.WriteLine("\tДанные из разархифированного файла: ");
+        FileInfo fileInfText = new FileInfo(pathFile);
+        //если файл создан, получить информацию о файле
+        if (fileInfText.Exists)
+        {
+          Console.WriteLine("\tИмя файла: {0}", fileInfText.Name);
+          Console.WriteLine("\tВремя создания: {0}", fileInfText.CreationTime);
+          Console.WriteLine("\tРазмер: {0}", fileInfText.Length);
+          Console.WriteLine();
+        }
+        //Открыть поток и прочитать файл
+        using (StreamReader sr = new StreamReader(pathFile))
+        {
+          Console.Write("\tИнформация из файла: ");
+          Console.WriteLine(sr.ReadToEnd());
+        }
+        //если файл создан, удалить его
+        if (fileInfText.Exists)
+        {
+          fileInfText.Delete();
+          Console.WriteLine($"\tФайл по пути {pathFile} удален.");
+          Console.WriteLine();
+        }
+        //удалить файл из архива
+        using (ZipArchive archive = ZipFile.Open(pathArchive, ZipArchiveMode.Update))
+        {
+          ZipArchiveEntry archiveEntry = archive.Entries[0];
+          archiveEntry.Delete();
+        }
+        Console.WriteLine($"\tФайл {pathFile} в архиве {pathArchive} был удален.");
+        FileInfo fileInfArchiveEmpty = new FileInfo(pathArchive);
+        //если файл создан, получить информацию о файле
+        if (fileInfArchiveEmpty.Exists)
+        {
+          Console.WriteLine("\tИмя файла: {0}", fileInfArchiveEmpty.Name);
+          Console.WriteLine("\tВремя создания: {0}", fileInfArchiveEmpty.CreationTime);
+          Console.WriteLine("\tРазмер: {0}", fileInfArchiveEmpty.Length);
+          Console.WriteLine();
+        }
+        //если файл создан, удалить его
+        if (fileInfArchive.Exists)
+        {
+          fileInfArchive.Delete();
+          Console.WriteLine($"\tФайл по пути {pathArchive} удален.");
+          Console.WriteLine();
+        }
+
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e.Message);
+      }
+    }
     static void Main(string[] args)
     {
       getDiskInformation();
@@ -246,6 +343,9 @@ namespace Kutin_Zakhar_laba1_OS
       processJsonFile(pathJSON);
       string pathXML = "students.xml";
       processXMLFile(pathXML);
+      string pathZIP = "fzip.zip";
+      string pathZIPFile = "fzip.txt";
+      processZIPArchive(pathZIP, pathZIPFile);
 
       Console.Read();
     }
