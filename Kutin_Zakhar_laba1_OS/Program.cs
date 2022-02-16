@@ -1,9 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Xml.Linq;
+using System.Text.Json;
 
 namespace Kutin_Zakhar_laba1_OS
 {
+  class Student
+  {
+    public string name { get; set; }
+    public string surName { get; set; }
+    public int year { get; set; }
+    public string group { get; set; }
+  }
+
   class Program
   {
     /// <summary>
@@ -29,25 +38,18 @@ namespace Kutin_Zakhar_laba1_OS
     }
 
     /// <summary>
-    /// Создает директорию по _pathDir, в которой создает текстовый файл по _path.
+    /// Создает текстовый файл по path.
     /// </summary>
-    /// <param name="_pathDir"></param>
-    /// <param name="_path"></param>
-    static void processTextFile(string _pathDir, string _path ) 
+    /// <param name="path"></param>
+    static void processTextFile(string path ) 
     {
       Console.WriteLine("2.Работа с файлами ");
-      //Создать папку 
-      DirectoryInfo dirInfo = new DirectoryInfo(_pathDir);
-      if (!dirInfo.Exists)
-      {
-        dirInfo.Create();
-      }
-      FileInfo fileInf = new FileInfo(_path);
+      FileInfo fileInf = new FileInfo(path);
       try
       {
-        using (FileStream fStream = File.Create(_path))
+        using (FileStream fStream = File.Create(path))
         {
-          Console.WriteLine($"\tФайл, создан по пути: {_path}");
+          Console.WriteLine($"\tФайл, создан по пути: {path}");
           //если файл создан, получить информацию о файле
           if (fileInf.Exists)
           {
@@ -67,12 +69,12 @@ namespace Kutin_Zakhar_laba1_OS
       try
       {
         //перезаписывает файл, добавляя строку
-        using (StreamWriter sw = new StreamWriter(_path, true, System.Text.Encoding.Default))
+        using (StreamWriter sw = new StreamWriter(path, true, System.Text.Encoding.Default))
         {
           sw.WriteLine(text);
         }
         //Открыть поток и прочитать файл
-        using (StreamReader sr = new StreamReader(_path))
+        using (StreamReader sr = new StreamReader(path))
         {
           Console.Write("\tИнформация из файла: ");
           Console.WriteLine(sr.ReadToEnd());
@@ -86,7 +88,72 @@ namespace Kutin_Zakhar_laba1_OS
       if (fileInf.Exists)
       {
         fileInf.Delete();
-        Console.WriteLine($"\tФайл по пути {_path} удален.");
+        Console.WriteLine($"\tФайл по пути {path} удален.");
+        Console.WriteLine();
+      }
+    }
+
+    /// <summary>
+    /// Создает файл JSON по path
+    /// </summary>
+    /// <param name="path"></param>
+    static void processJsonFile(string path)
+    {
+      Console.WriteLine("3.Работа с форматом JSON ");
+      FileInfo fileJSON = new FileInfo(path);
+      try
+      {
+        using (FileStream fStream = File.Create(path))
+        {
+          Console.WriteLine($"\tФайл, создан по пути: {path}");
+          //если файл создан, получить информацию о файле
+          if (fileJSON.Exists)
+          {
+            Console.WriteLine("\tИмя файла: {0}", fileJSON.Name);
+            Console.WriteLine("\tВремя создания: {0}", fileJSON.CreationTime);
+            Console.WriteLine("\tРазмер: {0}", fileJSON.Length);
+            Console.WriteLine();
+          }
+        }
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e.Message);
+      }
+      try
+      {
+      //запись данных
+      using (StreamWriter sw = new StreamWriter(path, true, System.Text.Encoding.Default))
+        {
+          Student student = new Student();
+          Console.Write("\tВведите имя студента: ");
+          student.name = Console.ReadLine();
+          Console.Write("\tВведите фамилию студента: ");
+          student.surName = Console.ReadLine();
+          Console.Write("\tВведите группу студента: ");
+          student.group = Console.ReadLine();
+          Console.Write("\tВведите год поступления студента: ");
+          student.year = int.Parse(Console.ReadLine());
+          sw.WriteLine(JsonSerializer.Serialize<Student>(student));
+        }
+        //чтение данных
+        using (StreamReader sr = new StreamReader(path))
+        {
+          Console.Write("\tИнформация из файла:\n ");
+          Student restoredStudent = JsonSerializer.Deserialize<Student>(sr.ReadToEnd());
+          Console.WriteLine($"\t\tName: {restoredStudent.name}\n\t\tSurname: {restoredStudent.surName}");
+          Console.WriteLine($"\t\tGroup: {restoredStudent.group}\n\t\tYear: {restoredStudent.surName}");
+        }
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e.Message);
+      }
+      //если файл создан, удалить его
+      if (fileJSON.Exists)
+      {
+        fileJSON.Delete();
+        Console.WriteLine($"\tФайл по пути {path} удален.");
         Console.WriteLine();
       }
     }
@@ -94,12 +161,31 @@ namespace Kutin_Zakhar_laba1_OS
     /// <summary>
     ///  Создает файл XML с названием fileName
     /// </summary>
-    /// <param name="fileName"></param>
-    static void processXMLFile(string fileName)
+    /// <param name="path"></param>
+    static void processXMLFile(string path)
     {
       Console.WriteLine("4.Работа с форматом XML ");
+      FileInfo fileXML = new FileInfo(path);
+      try
+      {
+        using (FileStream fStream = File.Create(path))
+        {
+          Console.WriteLine($"\tФайл, создан по пути: {path}");
+          //если файл создан, получить информацию о файле
+          if (fileXML.Exists)
+          {
+            Console.WriteLine("\tИмя файла: {0}", fileXML.Name);
+            Console.WriteLine("\tВремя создания: {0}", fileXML.CreationTime);
+            Console.WriteLine("\tРазмер: {0}", fileXML.Length);
+            Console.WriteLine();
+          }
+        }
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e.Message);
+      }
       XDocument xDoc = new XDocument();
-      Console.WriteLine($"\tФайл с именем {fileName} создан.");
       //создаем элемент - студент
       XElement student = new XElement("student");
       Console.Write("\tВведите имя студента: ");
@@ -125,11 +211,10 @@ namespace Kutin_Zakhar_laba1_OS
       // добавляем корневой элемент в документ
       xDoc.Add(students);
       //сохраняем документ
-      xDoc.Save(fileName);
+      xDoc.Save(path);
       
       //загружаем документ
-      XDocument xDocLoad = XDocument.Load(fileName);
-      XElement studentsXElement = xDoc.Element("students");
+      XDocument xDocLoad = XDocument.Load(path);
       XElement studentXElement = xDocLoad.Element("students").Element("student");
       //получаем информацию из документа
       nameXAttr = studentXElement.Attribute("name");
@@ -143,20 +228,24 @@ namespace Kutin_Zakhar_laba1_OS
       Console.WriteLine($"\t\tГруппа студента: {groupXElm.Value}");
       Console.WriteLine($"\t\tГод поступления студента: {yearXElm.Value}");
       Console.WriteLine($"\t\tФакультет студента: {facultyXElm.Value}");
-      //удалить файл XML
-      studentsXElement.RemoveAll();
-      xDocLoad.Save(fileName);
-      Console.WriteLine($"\tФайл с именем {fileName} очищен.");
+      //если файл создан, удалить его
+      if (fileXML.Exists)
+      {
+        fileXML.Delete();
+        Console.WriteLine($"\tФайл по пути {path} удален.");
+        Console.WriteLine();
+      }
     }
 
     static void Main(string[] args)
     {
       getDiskInformation();
-      string pathDirTXT = @"C:\SomeDirTXT";
-      string pathTXT = @"C:\SomeDirTXT\hta.txt";
-      processTextFile(pathDirTXT, pathTXT);
-      string fileName = "students.xml";
-      processXMLFile(fileName);
+      string pathTXT = "text.txt";
+      processTextFile(pathTXT);
+      string pathJSON = "student.json";
+      processJsonFile(pathJSON);
+      string pathXML = "students.xml";
+      processXMLFile(pathXML);
 
       Console.Read();
     }
