@@ -38,6 +38,7 @@ namespace Kutin_Zakhar_laba1_OS
       }
     }
 
+
     /// <summary>
     /// Создает текстовый файл по path.
     /// </summary>
@@ -73,12 +74,22 @@ namespace Kutin_Zakhar_laba1_OS
           Console.WriteLine(sr.ReadToEnd());
         }
         //если файл создан, удалить его
-        if (fileInf.Exists)
+        Console.Write("Хотите удалить файл? (1/0): ");
+        int sigh = int.Parse(Console.ReadLine());
+        if (sigh == 1) 
         {
-          fileInf.Delete();
-          Console.WriteLine($"\tФайл по пути {path} удален.");
-          Console.WriteLine();
+          if (fileInf.Exists)
+          {
+            fileInf.Delete();
+            Console.WriteLine($"\tФайл по пути {path} удален.");
+            Console.WriteLine();
+          }
         }
+        else
+        {
+          Console.WriteLine($"\tФайл по пути {path} удален.");
+        }
+
       }
       catch (Exception ex)
       {
@@ -125,8 +136,17 @@ namespace Kutin_Zakhar_laba1_OS
           student.SurName = Console.ReadLine();
           Console.Write("\tВведите группу студента: ");
           student.Group = Console.ReadLine();
-          Console.Write("\tВведите год поступления студента: ");
-          student.Year = int.Parse(Console.ReadLine());
+          while (true)
+          {
+            Console.Write("\tВведите год поступления студента: ");
+            string year =  Console.ReadLine();
+            if (int.TryParse(year, out int number))
+            {
+              student.Year = number;
+              break;
+            }
+            Console.Write("Вы ввели не число, введите число еще раз: ");
+          }
           sw.WriteLine(JsonSerializer.Serialize<Student>(student));
         }
         //чтение данных
@@ -138,12 +158,22 @@ namespace Kutin_Zakhar_laba1_OS
           Console.WriteLine($"\t\tGroup: {restoredStudent.Group}\n\t\tYear: {restoredStudent.SurName}");
         }
         //если файл создан, удалить его
-        if (fileJSON.Exists)
+        Console.Write("Хотите удалить файл? (1/0): ");
+        int sigh = int.Parse(Console.ReadLine());
+        if (sigh == 1) 
         {
-          fileJSON.Delete();
-          Console.WriteLine($"\tФайл по пути {path} удален.");
-          Console.WriteLine();
+          if (fileJSON.Exists)
+          {
+            fileJSON.Delete();
+            Console.WriteLine($"\tФайл по пути {path} удален.");
+            Console.WriteLine();
+          }
         }
+        else
+        {
+          Console.WriteLine($"\tФайл по пути {path} не удален.");
+        }
+
       }
       catch (Exception e)
       {
@@ -223,11 +253,20 @@ namespace Kutin_Zakhar_laba1_OS
       Console.WriteLine($"\t\tГод поступления студента: {yearXElm.Value}");
       Console.WriteLine($"\t\tФакультет студента: {facultyXElm.Value}");
       //если файл создан, удалить его
-      if (fileXML.Exists)
+      Console.Write("Хотите удалить файл? (1/0): ");
+      int sigh = int.Parse(Console.ReadLine());
+      if (sigh == 1)
       {
-        fileXML.Delete();
-        Console.WriteLine($"\tФайл по пути {path} удален.");
-        Console.WriteLine();
+        if (fileXML.Exists)
+        {
+          fileXML.Delete();
+          Console.WriteLine($"\tФайл по пути {path} удален.");
+          Console.WriteLine();
+        }
+      }
+      else
+      {
+        Console.WriteLine($"\tФайл по пути {path} не удален.");
       }
     }
 
@@ -305,12 +344,22 @@ namespace Kutin_Zakhar_laba1_OS
           Console.WriteLine();
         }
         //удалить файл из архива
-        using (ZipArchive archive = ZipFile.Open(pathArchive, ZipArchiveMode.Update))
+        Console.Write("Хотите удалить файл? (1/0): ");
+        int sign = int.Parse(Console.ReadLine());
+        if (sign == 1)
         {
-          ZipArchiveEntry archiveEntry = archive.Entries[0];
-          archiveEntry.Delete();
+          using (ZipArchive archive = ZipFile.Open(pathArchive, ZipArchiveMode.Update))
+          {
+            ZipArchiveEntry archiveEntry = archive.Entries[0];
+            archiveEntry.Delete();
+          }
+          Console.WriteLine($"\tФайл {pathFile} в архиве {pathArchive} был удален.");
         }
-        Console.WriteLine($"\tФайл {pathFile} в архиве {pathArchive} был удален.");
+        else
+        {
+          Console.WriteLine("$\tФайл { pathFile} в архиве { pathArchive} не был удален.");
+        }
+
         FileInfo fileInfArchiveEmpty = new FileInfo(pathArchive);
         //если файл создан, получить информацию о файле
         if (fileInfArchiveEmpty.Exists)
@@ -321,11 +370,20 @@ namespace Kutin_Zakhar_laba1_OS
           Console.WriteLine();
         }
         //если файл создан, удалить его
-        if (fileInfArchive.Exists)
+        Console.Write("Хотите удалить файл? (1/0): ");
+        sign = int.Parse(Console.ReadLine());
+        if (sign == 1)
         {
-          fileInfArchive.Delete();
-          Console.WriteLine($"\tФайл по пути {pathArchive} удален.");
-          Console.WriteLine();
+          if (fileInfArchive.Exists)
+          {
+            fileInfArchive.Delete();
+            Console.WriteLine($"\tФайл по пути {pathArchive} удален.");
+            Console.WriteLine();
+          }
+        }
+        else
+        {
+          Console.WriteLine($"\tФайл по пути {pathArchive} не удален.");
         }
 
       }
@@ -334,19 +392,54 @@ namespace Kutin_Zakhar_laba1_OS
         Console.WriteLine(e.Message);
       }
     }
+
     static void Main(string[] args)
     {
-      getDiskInformation();
-      string pathTXT = "text.txt";
-      processTextFile(pathTXT);
-      string pathJSON = "student.json";
-      processJsonFile(pathJSON);
-      string pathXML = "students.xml";
-      processXMLFile(pathXML);
-      string pathZIP = "fzip.zip";
-      string pathZIPFile = "fzip.txt";
-      processZIPArchive(pathZIP, pathZIPFile);
-
+      bool flag = true;
+      while (flag)
+      {
+        Console.WriteLine("Введите цифру для доступа к заданиям:");
+        Console.WriteLine("1.Вывести информацию в консоль о логических дисках, именах, метке тома, размере типе файловой системы. ");
+        Console.WriteLine("2.Работа с файлами ");
+        Console.WriteLine("3.Работа с форматом JSON ");
+        Console.WriteLine("4.Работа с форматом XML ");
+        Console.WriteLine("5.Создание zip архива, добавление туда файла, определение размера архива ");
+        Console.WriteLine("6.Очистить консоль");
+        Console.WriteLine("7.Выход из меню");
+        int input = int.Parse(Console.ReadLine());
+        switch (input)
+        {
+          case 1:
+            getDiskInformation();
+            break;
+          case 2:
+            string pathTXT = "text.txt";
+            processTextFile(pathTXT);
+            break;
+          case 3:
+            string pathJSON = "student.json";
+            processJsonFile(pathJSON);
+            break;
+          case 4:
+            string pathXML = "students.xml";
+            processXMLFile(pathXML);
+            break;
+          case 5:
+            string pathZIP = "fzip.zip";
+            string pathZIPFile = "fzip.txt";
+            processZIPArchive(pathZIP, pathZIPFile);
+            break;
+          case 6:
+            Console.Clear();
+            break;
+          case 7:
+            flag = false;
+            break;
+          default:
+            Console.WriteLine("Данного пункта нет в меню");
+            break;
+        } 
+      }
       Console.Read();
     }
   }
