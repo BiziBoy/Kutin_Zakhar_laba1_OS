@@ -340,7 +340,7 @@ namespace Kutin_Zakhar_laba1_OS
         if (fileInfText.Exists)
         {
           fileInfText.Delete();
-          Console.WriteLine($"\tФайл по пути {pathFile} удален.");
+          Console.WriteLine($"\tРазархивированный файл по пути {pathFile} удален.");
           Console.WriteLine();
         }
         //удалить файл из архива
