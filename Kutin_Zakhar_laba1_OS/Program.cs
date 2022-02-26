@@ -155,7 +155,7 @@ namespace Kutin_Zakhar_laba1_OS
           Console.Write("\tИнформация из файла:\n ");
           Student restoredStudent = JsonSerializer.Deserialize<Student>(sr.ReadToEnd());
           Console.WriteLine($"\t\tName: {restoredStudent.Name}\n\t\tSurname: {restoredStudent.SurName}");
-          Console.WriteLine($"\t\tGroup: {restoredStudent.Group}\n\t\tYear: {restoredStudent.SurName}");
+          Console.WriteLine($"\t\tGroup: {restoredStudent.Group}\n\t\tYear: {restoredStudent.Year}");
         }
         //если файл создан, удалить его
         Console.Write("Хотите удалить файл? (1/0): ");
